@@ -1,0 +1,16 @@
+// SPDX-License-Identifier: GPL-3.0
+pragma soliditypp >=0.8.0;
+
+import "cross_lang/Strings.sol";
+
+contract Test {
+    using Strings for uint256;
+
+    function toString(uint256 a) external pure returns(string memory) {
+        return a.toString();
+    }
+
+    function toHexString(uint256 a) external pure returns(string memory) {
+        return a.toHexString();
+    }
+}

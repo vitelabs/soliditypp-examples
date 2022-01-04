@@ -1,0 +1,35 @@
+// SPDX-License-Identifier: GPL-3.0
+// Demostrate how to call a contract and send tokens at the same time.
+
+pragma soliditypp >=0.8.0;
+
+contract A {
+   event Received(uint indexed topic, uint data, address sender, tokenId token, uint amount);
+
+   function f(uint a, uint t) external payable returns(uint) {
+      address sender = msg.sender;
+      tokenId token = msg.tokenid;
+      uint amount = msg.amount;
+
+      emit Received(t, a, sender, token, amount);
+      return a + 1;
+   }
+}
+
+// deploy B with a minimum of 3 VITE to test
+contract B {
+   A a;
+   uint public b;
+
+   constructor (address payable addr) payable {
+        a = A(addr);
+    }
+
+   function test(uint data) external {
+      // send an asynchronous call to a.f() with 1 VITE
+      a.f{value: 1e18}(data, 1);  // Note: there are no return values for async calls
+
+      // send a synchronous call to a.f() with 2 VITE
+      b = await a.f{token: "tti_5649544520544f4b454e6e40", value: 2e18}(data, 2);
+   }
+}

@@ -1,0 +1,20 @@
+// SPDX-License-Identifier: GPL-3.0
+// Demonstrate events and vmlogs.
+
+pragma soliditypp >=0.8.0;
+
+contract A {
+    event Event1(string data);
+    event Event2(uint i, string s);
+    event Event3(uint indexed t, uint i, string s);
+    event Event4(uint i, uint indexed t1, string s, string indexed t2);
+    event AnonymousEvent(uint indexed i, string data) anonymous;
+
+    function test() external {
+        emit Event1('hello world');
+        emit Event2(123, 'hello world');
+        emit Event3(1 ,123, 'hello world');
+        emit Event4(123 , 1, 'hello world', 'my_topic');
+        // emit AnonymousEvent(123, 'hello world');
+    }
+}

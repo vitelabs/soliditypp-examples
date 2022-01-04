@@ -1,0 +1,26 @@
+// SPDX-License-Identifier: GPL-3.0
+// Demonstrate how to call a contract asynchronously.
+
+pragma soliditypp >=0.8.0;
+
+interface Receiver {
+    function callback(string memory payload) external;
+}
+
+contract A {
+    function echo(string memory s) external {
+        string memory result = string(abi.encodePacked("hello ", s));
+        Receiver(msg.sender).callback(result);
+    }
+}
+
+contract B is Receiver {
+    event Received(string data);
+    function invoke(address a, string memory s) external {
+        A(a).echo(s);
+    }
+
+    function callback(string memory payload) external override {
+        emit Received(payload);
+    }
+}
