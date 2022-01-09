@@ -1,11 +1,7 @@
 import { describe } from "mocha";
 import { expect } from "chai";
-import {
-  Contract
-} from "../src/contract";
 import * as compiler from "../src/compiler";
 import * as vite from "../src/vite";
-import { Account } from "@vite/vitejs-accountblock";
 import config from "./vite.config.json";
 
 let provider: any;

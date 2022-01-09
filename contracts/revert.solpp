@@ -1,0 +1,32 @@
+// SPDX-License-Identifier: GPL-3.0
+pragma soliditypp >=0.8.0;
+
+contract A {
+    uint public data;
+    function inc(uint a) external returns(uint) {
+        data = a; // It will be reverted too.
+        revert("something wrong");
+        return a + 1;
+    }
+}
+
+contract B {
+    A a;
+    uint public b;
+
+    constructor (address addr) {
+        a = A(addr);
+    }
+
+    function test() external {
+        // NOTE: This assignment will NOT be reverted, 
+        // because the functions in Solidity++ don't have atomic semantics.
+        // This function is split into two transactions from the await statement to execute,
+        // the first one will success and the second one will revert.
+        b = 1; 
+
+        await a.inc(1); // It will be reverted from here.
+        
+        b = 2; // It will be reverted too.
+    }
+}
