@@ -32,7 +32,7 @@
         "PerCount": 1,
         "RandCount": 0,
         "RandRank": 100,
-        "Repeat": 48,
+        "Repeat": 1,
         "CheckLevel": 1,
         "CountingTokenId": "tti_5649544520544f4b454e6e40",
         "RegisterConditionId": 1,

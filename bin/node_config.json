@@ -1,5 +1,5 @@
 {
-  "LogLevel": "info",
+  "LogLevel": "debug",
   "NetID": 3,
   "GenesisFile": "./genesis.json",
   "PrivateKey": "511a6d8762bd95ce12819267f2c0fa092687ed6f47b21d43a35112a2792e4ebad7e63ddca1e41d311db9668bb0f6ff549cab9c24de03ecaa1643940a8fdc3937",

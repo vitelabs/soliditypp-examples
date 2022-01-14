@@ -1,6 +1,7 @@
 import { constant, abi as abiUtil } from "@vite/vitejs";
 import * as utils from "./utils";
 import * as vite from "./vite";
+var linker = require("@vite/solppc/linker");
 const { Vite_TokenId } = constant;
 
 export class Contract {
@@ -38,7 +39,8 @@ export class Contract {
       randomDegree = 0,
       params,
       tokenId,
-      amount
+      amount,
+      libraries
     }: {
       responseLatency?: Number;
       quotaMultiplier?: Number;
@@ -46,6 +48,7 @@ export class Contract {
       params?: string | Array<string | boolean>;
       tokenId?: string;
       amount?: string;
+      libraries?: Object;
     }
   ) {
     if (!this.deployer) {
@@ -56,6 +59,10 @@ export class Contract {
       console.error("Can not deploy contract, set a Vite provider first.");
       return;
     }
+
+    // link libraries
+    if (libraries)
+      this.link(libraries);
 
     const deployTransaction = this.deployer.createContract({
       abi: this.abi,
@@ -131,6 +138,13 @@ export class Contract {
       throw new Error("Contract call failed:" + methodName);
     }
     return receiveBlock;
+  }
+
+  link(libraries: Object) {
+    if (libraries) {
+      // console.log(linker.findLinkReferences(this.byteCode));
+      this.byteCode = linker.linkBytecode(this.byteCode, libraries);
+    }
   }
 
   async query(methodName: string, params:any[]) {

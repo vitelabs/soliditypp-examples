@@ -1,0 +1,19 @@
+// SPDX-License-Identifier: GPL-3.0
+pragma soliditypp >=0.8.0;
+
+library L { 
+    function double(uint self) public returns (uint) { 
+        // do something with side effects
+        return 2 * self;
+    }
+}
+
+contract A {
+    using L for uint;
+    uint public data;
+
+    function f(uint a) public returns (uint) {
+        data = a.double();
+        return data;
+    }
+}
