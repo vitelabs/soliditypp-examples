@@ -1,0 +1,14 @@
+// SPDX-License-Identifier: GPL-3.0
+pragma soliditypp ^0.4.3;
+
+contract HelloWorld {
+    uint _data = 123;
+
+    onMessage set(uint a) {
+        _data = a; 
+    }
+
+    getter data() returns(uint) {
+        return _data;
+    }
+}

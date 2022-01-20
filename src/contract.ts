@@ -8,6 +8,7 @@ export class Contract {
   provider: any;
   name: string;
   byteCode: string;
+  offchainCode: string;
   abi: any;
   address: string | undefined;
   deployer: any;
@@ -20,6 +21,7 @@ export class Contract {
     this.name = name;
     this.byteCode = byteCode;
     this.abi = abi;
+    this.offchainCode = "";
   }
 
   setProvider(provider: any): Contract {
@@ -157,12 +159,21 @@ export class Contract {
 
     let data = abiUtil.encodeFunctionCall(methodAbi, params);
     let dataBase64 = Buffer.from(data, 'hex').toString('base64');
+    let codeBase64;
+    if (this.offchainCode && this.offchainCode.length > 0)
+      codeBase64 = Buffer.from(this.offchainCode, 'hex').toString('base64');
 
     while(true) {
-      let result = await this.provider.request("contract_call", {
-        address: this.address,
-        data: dataBase64
-      });
+      let result = codeBase64 ? 
+        await this.provider.request("contract_callOffChainMethod", {
+          address: this.address,
+          code: codeBase64,
+          data: dataBase64
+        }) : 
+        await this.provider.request("contract_call", {
+          address: this.address,
+          data: dataBase64
+        });
 
       // parse result
       if (result) {
