@@ -40,17 +40,18 @@ export async function compile(sourcePath: string) {
 }
 
 function readSourceFile(sourceName: string) {
-    let content = fs.readFileSync(`${contractBase}/${sourceName}`).toString();
-    console.log('Compile source file:', sourceName);
-    return content;
+  let content = fs.readFileSync(`${contractBase}/${sourceName}`).toString();
+  // console.log('Compile source file:', sourceName);
+  return content;
 }
 
 function findImports(path: string) {
-    if (fs.existsSync(`${contractBase}/${path}`))
-        return {
-            contents: readSourceFile(path) 
-        };
-    else return { error: 'File not found' };
+  // console.log('Find imports:', path);
+  if (fs.existsSync(`${contractBase}/${path}`))
+      return {
+          contents: readSourceFile(path) 
+      };
+  else return { error: 'File not found' };
 }
 
 
