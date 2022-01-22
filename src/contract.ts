@@ -170,11 +170,11 @@ export class Contract {
           code: codeBase64,
           data: dataBase64
         }) : 
-        await this.provider.request("contract_call", {
+        await this.provider.request("contract_query", {
           address: this.address,
           data: dataBase64
         });
-
+        
       // parse result
       if (result) {
         let resultBytes = Buffer.from(result, 'base64').toString('hex');

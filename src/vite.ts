@@ -9,11 +9,14 @@ import config from "./vite.config.json";
 
 let process: any;
 let provider: any;
+let nodeConfig: any;
 
-export async function startLocalNetwork() {
+export async function startLocalNetwork(node: string = 'nightly') {
   console.log('[Vite] Starting Vite local network...');
+  nodeConfig = (config.nodes as any)[node];
+  console.log('Node binanry:', nodeConfig.name);
   process = exec(
-    `./restart.sh`,
+    `./restart.sh ${nodeConfig.name}`,
       {
           cwd: 'bin/'
       },
@@ -53,7 +56,9 @@ async function isNetworkUp() {
 
 export function localProvider() {
   if (!provider) {
-    provider = newProvider(config.networks.local.http);
+    if (!nodeConfig)
+      nodeConfig = config.nodes.nightly;
+    provider = newProvider(nodeConfig.http);
   }
   
   return provider;
