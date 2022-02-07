@@ -4,11 +4,11 @@
 pragma soliditypp >=0.8.0;
 
 contract A {
-   event Received(uint indexed topic, uint data, address sender, tti token, uint amount);
+   event Received(uint indexed topic, uint data, address sender, vitetoken token, uint amount);
 
    function f(uint a, uint t) external payable returns(uint) {
       address sender = msg.sender;
-      tti token = msg.token;
+      vitetoken token = msg.token;
       uint amount = msg.value;
 
       emit Received(t, a, sender, token, amount);

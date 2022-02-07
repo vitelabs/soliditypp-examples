@@ -4,14 +4,14 @@
 pragma soliditypp >=0.8.0;
 
 contract A {
-   event Received(address sender, tti token, uint amount);
+   event Received(address sender, vitetoken token, uint amount);
 
    constructor() payable {}
 
    // Receive Token function
    receive() external payable {
       address sender = msg.sender;
-      tti token = msg.token;
+      vitetoken token = msg.token;
       uint amount = msg.value;
 
       emit Received(sender, token, amount);
