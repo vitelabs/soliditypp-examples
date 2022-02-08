@@ -2,6 +2,7 @@
 // Demostrate how to call a contract and send tokens at the same time.
 
 pragma soliditypp >=0.8.0;
+pragma experimental Await;
 
 contract A {
    event Received(uint indexed topic, uint data, address sender, vitetoken token, uint amount);

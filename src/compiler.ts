@@ -24,7 +24,7 @@ export async function compile(sourcePath: string) {
 
     let output = JSON.parse(solppc.compile(JSON.stringify(input), { import: findImports }));
     // ignore 3805 warning (pre-release compiler)
-    const filteredErrors = output.errors.filter((err: any) => {return err.errorCode !== '3805'});
+    const filteredErrors = output.errors?.filter((err: any) => {return err.errorCode !== '3805'});
     if (filteredErrors && filteredErrors.length > 0) {
       console.error('Compile errors:', filteredErrors);
     }
