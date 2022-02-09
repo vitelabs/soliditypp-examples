@@ -1,5 +1,7 @@
-import * as vite from "../src/vite";
-import * as config from "./vite.config.json"
+const vite = require('@vite/vuilder');
+import nodeCfg from "./vite.node.json";
+
+vite.loadViteConfig(nodeCfg);
 
 export async function mochaGlobalSetup() {
     await vite.startLocalNetwork('nightly');

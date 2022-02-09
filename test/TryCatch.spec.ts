@@ -1,7 +1,6 @@
 import { describe } from "mocha";
 import { expect } from "chai";
-import * as compiler from "../src/compiler";
-import * as vite from "../src/vite";
+const vite = require('@vite/vuilder');
 import config from "./vite.config.json";
 
 let provider: any;
@@ -15,7 +14,7 @@ describe('test TryCatch.sol', () => {
 
   it('test try catch', async () => {
     // compile
-    const compiledContracts = await compiler.compile('TryCatch.sol');
+    const compiledContracts = await vite.compile('TryCatch.sol');
     expect(compiledContracts).to.have.property('A');
     expect(compiledContracts).to.have.property('B');
     expect(compiledContracts).to.have.property('C');

@@ -1,9 +1,7 @@
 import { describe } from "mocha";
 import { expect } from "chai";
-import * as compiler from "../src/compiler";
-import * as vite from "../src/vite";
+const vite = require('@vite/vuilder');
 import config from "./vite.config.json";
-import { sleep } from "../src/utils";
 
 let provider: any;
 let deployer: any;
@@ -16,7 +14,7 @@ describe('test events', () => {
 
   it('test contract', async () => {
     // compile
-    const compiledContracts = await compiler.compile('events.solpp');
+    const compiledContracts = await vite.compile('events.solpp');
     expect(compiledContracts).to.have.property('A');
 
     // deploy A
@@ -29,7 +27,7 @@ describe('test events', () => {
     // call a.test();
     await a.call('test', [], {});
 
-    sleep(1000);
+    vite.utils.sleep(1000);
     // check log
     let events = await a.getPastEvents('allEvents', {fromHeight: 2, toHeight: 2});
     // console.log(events);

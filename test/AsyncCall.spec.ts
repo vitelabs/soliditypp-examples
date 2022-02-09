@@ -1,9 +1,8 @@
 import { describe } from "mocha";
 import { expect } from "chai";
-import * as compiler from "../src/compiler";
-import * as vite from "../src/vite";
+const vite = require('@vite/vuilder');
 import config from "./vite.config.json";
-import { sleep } from "../src/utils";
+
 
 let provider: any;
 let deployer: any;
@@ -16,7 +15,7 @@ describe('test AsyncCall', () => {
 
   it('test contract', async () => {
     // compile
-    const compiledContracts = await compiler.compile('AsyncCall.solpp');
+    const compiledContracts = await vite.compile('AsyncCall.solpp');
     expect(compiledContracts).has.property('A');
     expect(compiledContracts).has.property('B');
 
@@ -39,7 +38,7 @@ describe('test AsyncCall', () => {
     // call b.invoke(a, 'world');
     await b.call('invoke', [a.address!, 'world'], {});
 
-    sleep(1000);
+    vite.utils.sleep(1000);
 
     // check events
     let events = await b.getPastEvents('Received', {fromHeight: 0, toHeight: 0});

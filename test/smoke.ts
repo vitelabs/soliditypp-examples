@@ -1,8 +1,6 @@
 import { describe } from "mocha";
 import { expect } from "chai";
-
-import * as vite from "../src/vite";
-import * as utils from "../src/utils"
+const vite = require('@vite/vuilder');
 
 let provider: any;
 
@@ -17,7 +15,7 @@ describe("smoke test", () => {
       vite.mint(provider);
       let h = await vite.getSnapshotHeight(provider);
       console.log('snapshot height:', h);
-      await utils.sleep(1000);
+      await vite.utils.sleep(1000);
     }
   });
 });

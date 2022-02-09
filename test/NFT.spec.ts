@@ -1,7 +1,6 @@
 import { describe } from "mocha";
 import { expect } from "chai";
-import * as compiler from "../src/compiler";
-import * as vite from "../src/vite";
+const vite = require('@vite/vuilder');
 import config from "./vite.config.json";
 
 let provider: any;
@@ -31,7 +30,7 @@ describe('test NFT', function () {
     await deployer.sendToken(charlie.address, '0');
     await charlie.receiveAll();
     // compile
-    const compiledContracts = await compiler.compile('NFT.solpp');
+    const compiledContracts = await vite.compile('NFT.solpp');
     expect(compiledContracts).to.have.property('NFT');
     contract = compiledContracts.NFT;
     // deploy

@@ -1,7 +1,6 @@
 import { describe } from "mocha";
 import { expect } from "chai";
-import * as compiler from "../../../src/compiler";
-import * as vite from "../../../src/vite";
+const vite = require('@vite/vuilder');
 import config from "../../vite.config.json";
 
 let provider: any;
@@ -14,7 +13,7 @@ describe('test open zeppelin', () => {
     provider = vite.localProvider();
     deployer = vite.newAccount(config.networks.local.mnemonic, 0);
     // compile
-    const compiledContracts = await compiler.compile('openzeppelin/mocks/StringsMock.sol');
+    const compiledContracts = await vite.compile('openzeppelin/mocks/StringsMock.sol');
     expect(compiledContracts).to.have.property('StringsMock');
     contract = compiledContracts.StringsMock;
     // deploy
