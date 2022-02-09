@@ -1,9 +1,7 @@
 import { describe } from "mocha";
 import { expect } from "chai";
-import * as compiler from "../src/compiler";
-import * as vite from "../src/vite";
+const vite = require('@vite/vuilder');
 import config from "./vite.config.json";
-import { sleep } from "../src/utils";
 
 let provider: any;
 let deployer: any;
@@ -16,7 +14,7 @@ describe('test library', () => {
 
   it('test library', async () => {
     // compile
-    const compiledContracts = await compiler.compile('library.solpp');
+    const compiledContracts = await vite.compile('library.solpp');
     expect(compiledContracts).to.have.property('A');
     expect(compiledContracts).to.have.property('L');
 

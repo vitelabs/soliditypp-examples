@@ -1,10 +1,6 @@
 import { describe } from "mocha";
 import { expect } from "chai";
-import {
-  Contract
-} from "../src/contract";
-import * as compiler from "../src/compiler";
-import * as vite from "../src/vite";
+const vite = require('@vite/vuilder');
 import { Account } from "@vite/vitejs-accountblock";
 import config from "./vite.config.json";
 
@@ -20,7 +16,7 @@ describe('test constructor', () => {
 
   it('test contract', async () => {
     // compile
-    const compiledContracts = await compiler.compile('constructor.solpp');
+    const compiledContracts = await vite.compile('constructor.solpp');
     expect(compiledContracts).to.have.property('Test');
 
     // deploy

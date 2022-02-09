@@ -1,7 +1,6 @@
 import { describe } from "mocha";
 import { expect } from "chai";
-import * as compiler from "../src/compiler";
-import * as vite from "../src/vite";
+const vite = require('@vite/vuilder');
 import config from "./vite.config.json";
 
 let provider: any;
@@ -15,7 +14,7 @@ describe('test magic', () => {
 
   it('test contract', async () => {
     // compile
-    const compiledContracts = await compiler.compile('magic.solpp');
+    const compiledContracts = await vite.compile('magic.solpp');
     expect(compiledContracts).to.have.property('Magic');
     let magic = compiledContracts.Magic;
 

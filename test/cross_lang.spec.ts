@@ -1,7 +1,6 @@
 import { describe } from "mocha";
 import { expect } from "chai";
-import * as compiler from "../src/compiler";
-import * as vite from "../src/vite";
+const vite = require('@vite/vuilder');
 import config from "./vite.config.json";
 
 let provider: any;
@@ -15,13 +14,13 @@ describe('test cross lang features', () => {
 
   it('test Strings.sol contract', async () => {
     // compile
-    const compiledContracts = await compiler.compile('cross_lang/Strings.sol');
+    const compiledContracts = await vite.compile('cross_lang/Strings.sol');
     expect(compiledContracts).to.have.property('Strings');
   });
 
   it('test Test.solpp contract', async () => {
     // compile
-    const compiledContracts = await compiler.compile('cross_lang/Test.solpp');
+    const compiledContracts = await vite.compile('cross_lang/Test.solpp');
     expect(compiledContracts).to.have.property('Test');
     let test = compiledContracts.Test;
 

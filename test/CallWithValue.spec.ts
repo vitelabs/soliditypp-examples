@@ -2,9 +2,7 @@ import { describe } from "mocha";
 import chai from 'chai';
 import chaiThings from 'chai-things';
 import chaiLike from 'chai-like';
-import * as compiler from "../src/compiler";
-import * as vite from "../src/vite";
-import * as utils from "../src/utils";
+const vite = require('@vite/vuilder');
 import config from "./vite.config.json";
 
 let provider: any;
@@ -23,7 +21,7 @@ describe('test CallWithValue', () => {
 
   it('test contract', async () => {
     // compile
-    const compiledContracts = await compiler.compile('CallWithValue.solpp');
+    const compiledContracts = await vite.compile('CallWithValue.solpp');
     expect(compiledContracts).to.have.property('A');
     expect(compiledContracts).to.have.property('B');
     let a = compiledContracts.A;

@@ -1,0 +1,19 @@
+{
+    "nodes": {
+        "release": {
+            "name": "gvite",
+            "version": "v2.11.0",
+            "http": "http://127.0.0.1:23456/"
+        },
+        "beta": {
+            "name": "gvite",
+            "version": "v2.11.1",
+            "http": "http://127.0.0.1:23456/"
+        },
+        "nightly": {
+            "name": "gvite",
+            "version": "v2.12.0-vm-nightly-202202090645",
+            "http": "http://127.0.0.1:23456/"
+        }
+    }
+}

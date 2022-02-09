@@ -1,8 +1,6 @@
 import { describe } from "mocha";
 import { expect } from "chai";
-import * as compiler from "../src/compiler";
-import * as vite from "../src/vite";
-import * as utils from "../src/utils";
+const vite = require('@vite/vuilder');
 import config from "./vite.config.json";
 
 let provider: any;
@@ -17,7 +15,7 @@ describe('test transfer', () => {
 
   it('test contract', async () => {
     // compile
-    const compiledContracts = await compiler.compile('transfer.solpp');
+    const compiledContracts = await vite.compile('transfer.solpp');
     expect(compiledContracts).to.have.property('A');
 
     // init user accounts
@@ -44,7 +42,7 @@ describe('test transfer', () => {
     // Alice sent 50 to the contract A
     const block = await alice.sendToken(a.address, '50');
 
-    await utils.waitFor(() => {
+    await vite.utils.waitFor(() => {
       return vite.isReceived(provider, block.hash);
     }, "Wait for receiving token");
 
