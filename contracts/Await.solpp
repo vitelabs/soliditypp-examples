@@ -1,0 +1,36 @@
+// SPDX-License-Identifier: GPL-3.0
+// Demonstrate how to use await operator
+
+pragma soliditypp >=0.8.0;
+pragma experimental Await;
+
+// step1: deploy A
+contract A {
+    uint public data;
+
+    function add(uint a, uint b) external returns(uint) {
+        data = a + b;
+        return data;
+    }
+}
+
+// step2: deploy B by passing the address of A as a parameter of contructor
+contract B {
+    A a;
+    uint public b;
+
+    constructor (address addr) {
+        a = A(addr);
+    }
+
+    function test(uint data) external returns(uint) {
+        uint temp1 = 1;
+        uint256 temp2 = 0x1122334455667788112233445566778811223344556677881122334455667788;
+        // call A synchronously
+        uint result = await a.add(data, 10);
+        require(temp1 == 1);
+        require(temp2 == 0x1122334455667788112233445566778811223344556677881122334455667788);
+        b = result;
+        return b;
+    }
+}
