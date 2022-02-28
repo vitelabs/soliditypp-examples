@@ -19,6 +19,10 @@ contract B {
         a = A(addr);
     }
 
+    function assertB(uint _b) external view {
+        require(b == _b);
+    }
+
     function test() external {
         // NOTE: This assignment will NOT be reverted, 
         // because the functions in Solidity++ don't have atomic semantics.
