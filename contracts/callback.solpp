@@ -1,0 +1,30 @@
+// SPDX-License-Identifier: GPL-3.0
+pragma soliditypp ^0.8.0;
+
+contract A {
+    function add(uint a, uint b, function(uint) external callback) external {
+        if (callback.address != address(0)) {
+            // send callback to return data to the caller
+            callback(a + b);
+        }
+    }
+}
+
+contract B {
+    A contractA;
+    uint public data;
+
+    constructor (address addr) {
+        contractA = A(addr);
+    }
+
+    function test() external {
+        contractA.add(1, 2, this.callback_onAdd);
+    }
+
+    function callback_onAdd(uint result) external {
+        // receive data from the called contract
+        require(msg.sender == address(contractA));
+        data = result;
+    }
+}
