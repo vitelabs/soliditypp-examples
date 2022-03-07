@@ -10,8 +10,8 @@ const MAX_UINT256 = '11579208923731619542357098500868790785326998466564056403945
 
 describe('test open zeppelin', () => {
   before(async function() {
-    provider = vite.localProvider();
-    deployer = vite.newAccount(config.networks.local.mnemonic, 0);
+    provider = vite.newProvider("http://127.0.0.1:23456");
+    deployer = vite.newAccount(config.networks.local.mnemonic, 0, provider);
     // compile
     const compiledContracts = await vite.compile('openzeppelin/mocks/StringsMock.sol');
     expect(compiledContracts).to.have.property('StringsMock');

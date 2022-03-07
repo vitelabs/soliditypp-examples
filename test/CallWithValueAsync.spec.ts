@@ -14,8 +14,8 @@ chai.use(chaiThings); // the order of plugins matters
 
 describe('test CallWithValue', () => {
   before(async function() {
-    provider = vite.localProvider();
-    deployer = vite.newAccount(config.networks.local.mnemonic, 0);
+    provider = vite.newProvider("http://127.0.0.1:23456");
+    deployer = vite.newAccount(config.networks.local.mnemonic, 0, provider);
     console.log('deployer', deployer.address);
   });
 

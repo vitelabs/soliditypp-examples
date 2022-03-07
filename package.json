@@ -4,10 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "npm run test-on-nightly",
-    "test-on-release": "./node_modules/.bin/mocha --config ./test/mocharc.release.json",
-    "test-on-beta": "./node_modules/.bin/mocha --config ./test/mocharc.beta.json",
-    "test-on-nightly": "./node_modules/.bin/mocha --config ./test/mocharc.nightly.json",
+    "test": "npx vuilder test --config test/vite.node.json",
     "run": "./node_modules/.bin/ts-node "
   },
   "author": "charles@vite.org",
@@ -19,7 +16,6 @@
     "chai-as-promised": "^7.1.1",
     "@types/mocha": "^9.0.0",
     "@types/node": "^14.6.2",
-    "@vite/vuilder": "^0.1.0-alpha.9",
     "axios": "^0.21.4",
     "chai": "^4.3.4",
     "chai-like": "^1.1.1",
@@ -30,5 +26,7 @@
     "ts-node": "^9.0.0",
     "typescript": "^4.0.2"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@vite/vuilder": "^0.1.0-alpha.12"
+  }
 }

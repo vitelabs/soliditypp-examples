@@ -8,8 +8,8 @@ let deployer: any;
 
 describe('test transfer', () => {
   before(async function() {
-    provider = vite.localProvider();
-    deployer = vite.newAccount(config.networks.local.mnemonic, 0);
+    provider = vite.newProvider("http://127.0.0.1:23456");
+    deployer = vite.newAccount(config.networks.local.mnemonic, 0, provider);
     console.log('deployer', deployer.address);
   });
 
@@ -19,9 +19,9 @@ describe('test transfer', () => {
     expect(compiledContracts).to.have.property('A');
 
     // init user accounts
-    const alice = vite.newAccount(config.networks.local.mnemonic, 1);
+    const alice = vite.newAccount(config.networks.local.mnemonic, 1, provider);
     console.log('alice', alice.address);
-    const bob = vite.newAccount(config.networks.local.mnemonic, 2);
+    const bob = vite.newAccount(config.networks.local.mnemonic, 2, provider);
     console.log('bob', bob.address);
     await deployer.sendToken(alice.address, '200');
     await alice.receiveAll();
