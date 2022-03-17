@@ -6,7 +6,7 @@ let provider: any;
 
 describe("smoke test", () => {
   before(async function() {
-    provider = vite.localProvider();
+    provider = vite.newProvider("http://127.0.0.1:23456");
   });
 
   it("checking height", async () => {

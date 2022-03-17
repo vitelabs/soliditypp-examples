@@ -1,5 +1,11 @@
 import { describe } from "mocha";
-import { expect } from "chai";
+var chai = require("chai");
+var chaiAsPromised = require("chai-as-promised");
+
+chai.use(chaiAsPromised);
+const expect = chai.expect;
+
+
 const vite = require('@vite/vuilder');
 import config from "./vite.config.json";
 
@@ -8,8 +14,8 @@ let deployer: any;
 
 describe('test revert', () => {
   before(async function() {
-    provider = vite.localProvider();
-    deployer = vite.newAccount(config.networks.local.mnemonic, 0);
+    provider = vite.newProvider("http://127.0.0.1:23456");
+    deployer = vite.newAccount(config.networks.local.mnemonic, 0, provider);
   });
 
   it('test revert', async () => {
@@ -31,6 +37,11 @@ describe('test revert', () => {
       params: [a.address!]
     });
     expect(b.address).to.be.a('string');
+
+    // B.assert(1234) should revert
+    await expect(
+      b.call('assertB', ['1234'], {})
+    ).to.eventually.be.rejectedWith("revert"); 
 
     // call B.test()
     await b.call('test', [], {});

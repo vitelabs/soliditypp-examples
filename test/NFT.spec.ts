@@ -17,12 +17,12 @@ const secondTokenId = '79217';
 
 describe('test NFT', function () {
   before(async function () {
-    provider = vite.localProvider();
+    provider = vite.newProvider("http://127.0.0.1:23456");
     // init users
-    deployer = vite.newAccount(config.networks.local.mnemonic, 0);
-    alice = vite.newAccount(config.networks.local.mnemonic, 1);
-    bob = vite.newAccount(config.networks.local.mnemonic, 2);
-    charlie = vite.newAccount(config.networks.local.mnemonic, 3);
+    deployer = vite.newAccount(config.networks.local.mnemonic, 0, provider);
+    alice = vite.newAccount(config.networks.local.mnemonic, 1, provider);
+    bob = vite.newAccount(config.networks.local.mnemonic, 2, provider);
+    charlie = vite.newAccount(config.networks.local.mnemonic, 3, provider);
     await deployer.sendToken(alice.address, '0');
     await alice.receiveAll();
     await deployer.sendToken(bob.address, '0');
