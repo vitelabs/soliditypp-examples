@@ -38,7 +38,7 @@ describe.only('test NFT', function () {
   //anotherApproved
   //operator
   //other
-  this.beforeEach(async function () {
+  before(async function () {
     
     provider = vite.newProvider("http://127.0.0.1:23456");
 
@@ -61,7 +61,9 @@ describe.only('test NFT', function () {
     const compiledContracts = await vite.compile('NFT.solpp');
     expect(compiledContracts).to.have.property('NFT');
     contract = compiledContracts.NFT;
+  });
 
+  beforeEach(async function () {
     // deploy
     contract.setDeployer(deployer).setProvider(provider);
     await contract.deploy({params: [name, symbol], responseLatency: 1});
@@ -120,7 +122,7 @@ describe.only('test NFT', function () {
       context('when the given token ID was not tracked by this token', function () {
         const tokenId = nonExistentTokenId;
 
-        it.only('reverts', async function () {
+        it('reverts', async function () {
           await expect(
             // FIXME: calling contract.query ends with "Query failed, try again." but does not reject, must use call?
             contract.call('ownerOf', [tokenId], {})
@@ -130,7 +132,7 @@ describe.only('test NFT', function () {
 
     });
   
-    describe('transfers', function () {
+    describe.only('transfers', function () {
       const tokenId = firstTokenId;
 //      const data = '0x42';
 //      let logs = null;
@@ -138,15 +140,14 @@ describe.only('test NFT', function () {
       beforeEach(async function () {
         await contract.call('approve', [approved.address, tokenId], {caller: owner});
         await contract.call('setApprovalForAll', [operator.address, tokenId], {caller: owner});
-        //        await this.token.approve(approved, tokenId, { from: owner });
-//        await this.token.setApprovalForAll(operator, true, { from: owner });
+        // they set toWhom
+        // await this.token.approve(approved, tokenId, { from: owner });
+        // await this.token.setApprovalForAll(operator, true, { from: owner });
       });
-
-
 
       const transferWasSuccessful = function ({from, to, tokenId} : { from: any, to: any, tokenId: any} ) {
         it('transfers the ownership of the given token ID to the given address', async function () {
-          console.log("BBBBBB1:", from, to, tokenId)
+          console.log("BBBBBB1:", from.address, to.address, tokenId)
           expect(await contract.query('ownerOf',[tokenId])).to.be.deep.equal([to.address]);
         });
 
@@ -182,36 +183,40 @@ describe.only('test NFT', function () {
       };
 
       const shouldTransferTokensByUsers = function (transferFunction : any) {
-        context('when called by the owner', function () {
+        context.only('when called by the owner', function () {
           beforeEach(async function () {
+            console.log("AAAAAAAAAAAA1:", owner.address, other.address)
             await transferFunction(owner, other, tokenId, { caller: owner });
           });
-          console.log("AAAAAAAAAAAA1:", owner, other)
+          it('prints owner', function (){
+            console.log("ZZZZZZZZZZZ:", owner.address);
+          });
+          //console.log("CCCCCCCCCCCCC1:", owner.address, other.address)
           transferWasSuccessful({ from: owner, to: other, tokenId });
         });
 
         context('when called by the approved individual', function () {
           beforeEach(async function () {
+            console.log("AAAAAAAAAAAA2:", owner.address, other.address)
             await transferFunction(owner, other, tokenId, { caller: approved });
           });
-          console.log("AAAAAAAAAAAA2:", owner, other)
           transferWasSuccessful({ from: owner, to : other, tokenId });
         });
 
         context('when called by the operator', function () {
           beforeEach(async function () {
+            console.log("AAAAAAAAAAAA3:", owner.address, other.address)
             await transferFunction(owner, other, tokenId, { caller: operator })
           });
-          console.log("AAAAAAAAAAAA3:", owner, other)
           transferWasSuccessful({ from: owner, to: other, tokenId });
         });
 
         context('when called by the owner without an approved user', function () {
           beforeEach(async function () {
+            console.log("AAAAAAAAAAAA4:", owner.address, other.address)
             await contract.call('approve', [ZERO_ADDRESS, tokenId], { caller: owner });
             await transferFunction(owner, other, tokenId, { caller: operator })
           });
-          console.log("AAAAAAAAAAAA1:", owner, other)
           transferWasSuccessful({ from: owner, to: other, tokenId });
         });
 
