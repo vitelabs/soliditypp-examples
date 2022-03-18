@@ -6,6 +6,11 @@ const expect = chai.expect;
 const vite = require('@vite/vuilder');
 import config from "./vite.config.json";
 
+// - Managing context for dynamically generated tests/assertions is not done well and is prone to hidden bugs.
+// - Should probably use addresses rather than accounts. Right now I use account.address which is clunky.
+// - Calling contract.query ends with "Query failed, try again." but does not reject/revert, must use call?
+// - Currently implemented
+// - Reverts can't get the "ERC721: error blah blah"
 
 let provider: any;
 
@@ -15,6 +20,7 @@ let owner: any;
 let contract: any;
 let other: any;
 let approved: any;
+let anotherApproved: any;
 let operator: any;
 
 const name = 'Non Fungible Token';
@@ -22,24 +28,14 @@ const symbol = 'NFT';
 const firstTokenId = '5042';
 const secondTokenId = '79217';
 const nonExistentTokenId = '13';
-//const fourthTokenId = new BN(4);
 const ZERO_ADDRESS = "vite_0000000000000000000000000000000000000000a4f3a0cb58";
-
-//const function expectEvent(){};
-//const function expectRevert(){};
-
 const baseURI = 'https://api.example.com/v1/';
 
 
 describe.only('test NFT', function () {
-  //owner  
-  //newOwner
-  //approved
-  //anotherApproved
-  //operator
-  //other
+
   before(async function () {
-    
+    // set up provider for all tests
     provider = vite.newProvider("http://127.0.0.1:23456");
 
     // init all accounts
@@ -47,12 +43,15 @@ describe.only('test NFT', function () {
     owner = vite.newAccount(config.networks.local.mnemonic, 1, provider);
     other = vite.newAccount(config.networks.local.mnemonic, 2, provider);
     approved = vite.newAccount(config.networks.local.mnemonic, 3, provider);
-    operator = vite.newAccount(config.networks.local.mnemonic, 4, provider);
+    anotherApproved = vite.newAccount(config.networks.local.mnemonic, 4, provider);
+    operator = vite.newAccount(config.networks.local.mnemonic, 5, provider);
     await deployer.sendToken(owner.address, '0');
     await owner.receiveAll();
     await deployer.sendToken(other.address, '0');
     await other.receiveAll();
     await deployer.sendToken(approved.address, '0');
+    await approved.receiveAll();
+    await deployer.sendToken(anotherApproved.address, '0');
     await approved.receiveAll();
     await deployer.sendToken(operator.address, '0');
     await operator.receiveAll();
@@ -64,7 +63,7 @@ describe.only('test NFT', function () {
   });
 
   beforeEach(async function () {
-    // deploy
+    // deploy fresh contract for each test
     contract.setDeployer(deployer).setProvider(provider);
     await contract.deploy({params: [name, symbol], responseLatency: 1});
     expect(contract.address).to.be.a('string');
@@ -75,7 +74,6 @@ describe.only('test NFT', function () {
     beforeEach(async function () {
       await contract.call('mint', [owner.address, firstTokenId], {});
       await contract.call('mint', [owner.address, secondTokenId], {});
-      //this.toWhom = other; // default to other for toWhom in context-dependent tests
     });
 
     describe('balanceOf', function () {
@@ -94,17 +92,8 @@ describe.only('test NFT', function () {
       context('when querying the zero address', function () {
         it('reverts', async function () {
           await expect(
-            // FIXME: calling contract.query ends with "Query failed, try again." but does not reject, must use call?
-            // contract.query('balanceOf', [ZERO_ADDRESS])
             contract.call('balanceOf', [ZERO_ADDRESS], {})
           ).to.eventually.be.rejectedWith("revert"); 
-          
-          /*
-          // FIXME: Solidity contracts like ERC721 revert with a message, is this possible to verify?
-          await expectRevert(
-            this.token.balanceOf(ZERO_ADDRESS), 'ERC721: balance query for the zero address',
-          );
-          */
         });
       });
       
@@ -124,7 +113,6 @@ describe.only('test NFT', function () {
 
         it('reverts', async function () {
           await expect(
-            // FIXME: calling contract.query ends with "Query failed, try again." but does not reject, must use call?
             contract.call('ownerOf', [tokenId], {})
           ).to.eventually.be.rejectedWith("revert"); 
         });
@@ -132,45 +120,64 @@ describe.only('test NFT', function () {
 
     });
   
-    describe.only('transfers', function () {
+    describe('transfers', function () {
       const tokenId = firstTokenId;
-//      const data = '0x42';
-//      let logs = null;
 
       beforeEach(async function () {
         await contract.call('approve', [approved.address, tokenId], {caller: owner});
         await contract.call('setApprovalForAll', [operator.address, tokenId], {caller: owner});
-        // they set toWhom
-        // await this.token.approve(approved, tokenId, { from: owner });
-        // await this.token.setApprovalForAll(operator, true, { from: owner });
+        
+        // set default context for verifying success in transferWasSuccessful()
+        this.from = owner
+        this.to = other
+        this.approved = approved
+        this.operator = operator
       });
 
-      const transferWasSuccessful = function ({from, to, tokenId} : { from: any, to: any, tokenId: any} ) {
+      const transferWasSuccessful = function () {
         it('transfers the ownership of the given token ID to the given address', async function () {
-          console.log("BBBBBB1:", from.address, to.address, tokenId)
-          expect(await contract.query('ownerOf',[tokenId])).to.be.deep.equal([to.address]);
+          expect(await contract.query('ownerOf',[tokenId])).to.be.deep.equal([this.to.address]);
         });
 
-        // needs expectEvent        
-        //it('emits a Transfer event', async function () {
-        //  expectEvent.inLogs(logs, 'Transfer', { from: owner, to: this.toWhom, tokenId: tokenId });
-        //});
+        it('emits a Transfer event', async function () {
+          vite.utils.sleep(1000);
+          let events = await contract.getPastEvents('Transfer', {fromHeight: 1, toHeight: 99});
+          expect(events).to.be.an('array')
+          let latestEvent = events[events.length-1];
+          expect(latestEvent.returnValues).to.be.deep.equal({
+            '0': this.from.address,
+            '1': this.to.address,
+            '2': tokenId,
+            'from': this.from.address,
+            'to': this.to.address,
+            'tokenId': tokenId
+          })
+        });
 
         it('clears the approval for the token ID', async function () {
           expect(await contract.query('getApproved', [tokenId])).to.be.deep.equal([ZERO_ADDRESS]);
         });
 
-        // needs expectEvent        
-        // it('emits an Approval event', async function () {
-        //   expectEvent.inLogs(logs, 'Approval', { owner, approved: ZERO_ADDRESS, tokenId: tokenId });
-        // });
-
-        it('adjusts owners balances', async function () {
-          expect(await contract.query('balanceOf', [from.address])).to.be.deep.equal([1]);
+        it('emits an Approval event', async function () {
+          vite.utils.sleep(1000);
+          let events = await contract.getPastEvents('Approval', {fromHeight: 1, toHeight: 99});
+          expect(events).to.be.an('array')
+          let latestEvent = events[events.length-1];
+          expect(latestEvent.returnValues).to.be.deep.equal({
+            '0': this.from.address,
+            '1': ZERO_ADDRESS,
+            '2': tokenId,
+            'owner': this.from.address,
+            'approved': ZERO_ADDRESS,
+            'tokenId': tokenId
+          })
         });
 
-        
-        // I don't understand this
+        it('adjusts owners balances', async function () {
+          expect(await contract.query('balanceOf', [this.from.address])).to.be.deep.equal(['1']);
+        });
+
+        // TODO
         /*
         it('adjusts owners tokens by index', async function () {
           if (!this.token.tokenOfOwnerByIndex) return;
@@ -183,45 +190,38 @@ describe.only('test NFT', function () {
       };
 
       const shouldTransferTokensByUsers = function (transferFunction : any) {
-        context.only('when called by the owner', function () {
+        context('when called by the owner', function () {
           beforeEach(async function () {
-            console.log("AAAAAAAAAAAA1:", owner.address, other.address)
             await transferFunction(owner, other, tokenId, { caller: owner });
           });
-          it('prints owner', function (){
-            console.log("ZZZZZZZZZZZ:", owner.address);
-          });
-          //console.log("CCCCCCCCCCCCC1:", owner.address, other.address)
-          transferWasSuccessful({ from: owner, to: other, tokenId });
+          transferWasSuccessful();
         });
 
         context('when called by the approved individual', function () {
           beforeEach(async function () {
-            console.log("AAAAAAAAAAAA2:", owner.address, other.address)
             await transferFunction(owner, other, tokenId, { caller: approved });
           });
-          transferWasSuccessful({ from: owner, to : other, tokenId });
+          transferWasSuccessful();
         });
 
         context('when called by the operator', function () {
           beforeEach(async function () {
-            console.log("AAAAAAAAAAAA3:", owner.address, other.address)
             await transferFunction(owner, other, tokenId, { caller: operator })
           });
-          transferWasSuccessful({ from: owner, to: other, tokenId });
+          transferWasSuccessful();
         });
 
         context('when called by the owner without an approved user', function () {
           beforeEach(async function () {
-            console.log("AAAAAAAAAAAA4:", owner.address, other.address)
             await contract.call('approve', [ZERO_ADDRESS, tokenId], { caller: owner });
             await transferFunction(owner, other, tokenId, { caller: operator })
           });
-          transferWasSuccessful({ from: owner, to: other, tokenId });
+          transferWasSuccessful();
         });
 
         context('when sent to the owner', function () {
           beforeEach(async function () {
+            this.to = owner // set context
             await transferFunction(owner, owner, tokenId, { caller: owner });
           });
 
@@ -233,21 +233,28 @@ describe.only('test NFT', function () {
             expect(await contract.query('getApproved', [tokenId])).to.be.deep.equal([ZERO_ADDRESS]);
           });
 
-          /*
+          // FIXME this is equivalent to what OpenZeppelin had, however,
+          // it does not enforce that "only" a transfer event is emitted
           it('emits only a transfer event', async function () {
-            expectEvent.inLogs(logs, 'Transfer', {
-              from: owner,
-              to: owner,
-              tokenId: tokenId,
-            });
+            vite.utils.sleep(1000);
+            let events = await contract.getPastEvents('Transfer', {fromHeight: 1, toHeight: 99});
+            expect(events).to.be.an('array')
+            let latestEvent = events[events.length-1];
+            expect(latestEvent.returnValues).to.be.deep.equal({
+              '0': this.from.address,
+              '1': this.to.address,
+              '2': tokenId,
+              'from': this.from.address,
+              'to': this.to.address,
+              'tokenId': tokenId
+            })
           });
-          */
 
           it('keeps the owner balance', async function () {
             expect(await contract.query('balanceOf', [owner.address])).to.be.deep.equal(['2']);
           });
 
-          /*
+          /* TODO I don't understand the meaning of this yet
           it('keeps same tokens by index', async function () {
             if (!this.token.tokenOfOwnerByIndex) return;
             const tokensListed = await Promise.all(
@@ -260,59 +267,189 @@ describe.only('test NFT', function () {
           */
         });
 
-        /*        
-        context('when the address of the previous owner is incorrect', function () {
+        context('when the address of the previous owner is incorrect', function () {    
           it('reverts', async function () {
-            await expectRevert(
+            await expect(
               transferFunction(other, other, tokenId, { caller: owner }),
-              'ERC721: transfer from incorrect owner',
-            );
+            ).to.eventually.be.rejectedWith("revert"); 
           });
-        });
-        */
-
-        /*        
+        });        
+                
         context('when the sender is not authorized for the token id', function () {
           it('reverts', async function () {
-            await expectRevert(
+            await expect(
               transferFunction(owner, other, tokenId, { caller: other }),
-              'ERC721: transfer caller is not owner nor approved',
-            );
+            ).to.eventually.be.rejectedWith("revert");
           });
         });
-        */
 
-        /*        
         context('when the given token ID does not exist', function () {
           it('reverts', async function () {
-            await expectRevert(
+            await expect(
               transferFunction(owner, other, nonExistentTokenId, { caller: owner }),
-              'ERC721: operator query for nonexistent token',
-            );
+            ).to.eventually.be.rejectedWith("revert");
           });
         });
-        */
 
-        /*        
         context('when the address to transfer the token to is the zero address', function () {
           it('reverts', async function () {
-            await expectRevert(
-              transferFunction(owner, ZERO_ADDRESS, tokenId, { caller: owner }),
-              'ERC721: transfer to the zero address',
-            );
+            await expect(
+              transferFunction(owner, {address: ZERO_ADDRESS}, tokenId, { caller: owner }),
+            ).to.eventually.be.rejectedWith("revert");
           });
         });
-        */
+        
       };
 
       // maybe from.address should be put elsewhere
       describe('via transferFrom', function () {
-        shouldTransferTokensByUsers(async function (from: any, to: any, tokenId: any, { caller } : { caller : any } ) {          
+        shouldTransferTokensByUsers(async function (from: any, to: any, tokenId: any, { caller } : { caller : any } ) {
           return contract.call('transferFrom', [from.address, to.address, tokenId], { caller });
         });
       });
 
     });
+
+    describe.only('approve', function () {
+      const tokenId = firstTokenId;
+
+      beforeEach( async function() {
+        this.owner = owner;
+        this.approved = approved;
+        this.anotherApproved = anotherApproved;
+      });
+
+      const itClearsApproval = function () {
+        it('clears approval for the token', async function () {
+          expect(await contract.query('getApproved', [tokenId])).to.be.deep.equal([ZERO_ADDRESS]);
+        });
+      };
+
+      const itApproves = function (address : string) {
+        it('sets the approval for the target address', async function () {
+          expect(await contract.query(['getApproved'], [tokenId])).to.be.equal([address]);
+        });
+      };
+
+      const itEmitsApprovalEvent = function (address : string) {
+        it('emits an approval event', async function () {
+          vite.utils.sleep(1000);
+          let events = await contract.getPastEvents('Approval', {fromHeight: 1, toHeight: 99});
+          expect(events).to.be.an('array')
+          let latestEvent = events[events.length-1];
+          expect(latestEvent.returnValues).to.be.deep.equal({
+            '0': this.owner.address,
+            '1': address,
+            '2': tokenId,
+            'owner': this.owner.address,
+            'approved': address,
+            'tokenId': tokenId
+          })
+        });
+      };
+
+      context('when clearing approval', function () {
+        context('when there was no prior approval', function () {
+          beforeEach(async function () {
+            await contract.call('approve', [ZERO_ADDRESS, tokenId], { caller: owner });
+          });
+
+          itClearsApproval();
+          itEmitsApprovalEvent(ZERO_ADDRESS);
+        });
+
+        context('when there was a prior approval', function () {
+          beforeEach(async function () {
+            await contract.call('approve', [approved.address, tokenId], { caller: owner });
+            await contract.call('approve', [ZERO_ADDRESS, tokenId], { caller: owner });
+          });
+
+          itClearsApproval();
+          itEmitsApprovalEvent(ZERO_ADDRESS);
+        });
+        
+      });
+
+      context('when approving a non-zero address', function () {
+        context('when there was no prior approval', function () {
+          beforeEach(async function () {
+            await contract.call('approve', [approved.address, tokenId], { caller: owner });
+          });
+
+          //TODO figure out dealing with context/dynamic content here
+          //itApproves(approved.address);
+          //itEmitsApprovalEvent(approved.address);
+        });
+
+        context('when there was a prior approval to the same address', function () {
+          beforeEach(async function () {
+            await contract.call('approve',[approved.address, tokenId], { from: owner });
+            await contract.call('approved', [tokenId], { from: owner });
+          });
+
+          //TODO figure out dealing with context/dynamic content here
+          //itApproves(approved.address);
+          //itEmitsApprovalEvent(approved.address);
+        });
+
+        context('when there was a prior approval to a different address', function () {
+          beforeEach(async function () {
+            await contract.call('approve', [anotherApproved.address, tokenId], { from: owner });
+            await contract.call('approve', [anotherApproved.address, tokenId], { from: owner });
+          });
+
+          //TODO figure out dealing with context here
+          //itApproves(anotherApproved.address);
+          //itEmitsApprovalEvent(anotherApproved.address);
+        });
+      });
+      
+      // TODO following:
+      /* 
+      context('when the address that receives the approval is the owner', function () {
+        it('reverts', async function () {
+          await expectRevert(
+            this.token.approve(owner, tokenId, { from: owner }), 'ERC721: approval to current owner',
+          );
+        });
+      });
+
+      context('when the sender does not own the given token ID', function () {
+        it('reverts', async function () {
+          await expectRevert(this.token.approve(approved, tokenId, { from: other }),
+            'ERC721: approve caller is not owner nor approved');
+        });
+      });
+
+      context('when the sender is approved for the given token ID', function () {
+        it('reverts', async function () {
+          await this.token.approve(approved, tokenId, { from: owner });
+          await expectRevert(this.token.approve(anotherApproved, tokenId, { from: approved }),
+            'ERC721: approve caller is not owner nor approved for all');
+        });
+      });
+
+      context('when the sender is an operator', function () {
+        beforeEach(async function () {
+          await this.token.setApprovalForAll(operator, true, { from: owner });
+          ({ logs } = await this.token.approve(approved, tokenId, { from: operator }));
+        });
+
+        itApproves(approved);
+        itEmitsApprovalEvent(approved);
+      });
+
+      context('when the given token ID does not exist', function () {
+        it('reverts', async function () {
+          await expectRevert(this.token.approve(approved, nonExistentTokenId, { from: operator }),
+            'ERC721: owner query for nonexistent token');
+        });
+      });
+
+      */
+
+    });
+
   });
 });
       /*
