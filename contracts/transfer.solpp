@@ -14,11 +14,15 @@ contract A {
       vitetoken token = msg.token;
       uint amount = msg.value;
 
-      emit Received(sender, token, amount);
+      logEvent(sender, token, amount);
    }
 
    function sendViteTo(address payable addr, uint amount) external {
       // send VITE to `addr`
       addr.transfer("tti_5649544520544f4b454e6e40", amount);
+   }
+
+   function logEvent(address sender, vitetoken token, uint amount) internal {
+      emit Received(sender, token, amount);
    }
 }

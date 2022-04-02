@@ -12,7 +12,7 @@
         },
         "nightly": {
             "name": "gvite",
-            "version": "v2.12.0-vm-nightly-202202090645",
+            "version": "v2.12.0-nightly-202204012212",
             "http": "http://127.0.0.1:23456/"
         }
     },
