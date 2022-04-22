@@ -1,0 +1,28 @@
+// SPDX-License-Identifier: GPL-3.0
+pragma soliditypp >=0.8.0;
+pragma experimental Await;
+
+import "./builtin.solpp";
+
+contract Test {
+    vitetoken public tokenId;
+    string public name;
+
+    function issue() external returns(vitetoken) {
+        tokenId = await BuiltinContractAsset.issue(true, "Test Coin", "TST", 1e5, 2, 1e6);
+        return tokenId;
+    }
+
+    function mint(uint256 amount, address addr) external returns(bytes32) {
+        return await BuiltinContractAsset.mint(tokenId, addr, amount);
+    }
+
+    function burn(uint256 amount) external {
+        await BuiltinContractAsset.burn{token: tokenId, value: amount}();
+    }
+
+    function getName() external returns(string memory) {
+        name = await BuiltinContractAsset.name(tokenId);
+        return name;
+    }
+}

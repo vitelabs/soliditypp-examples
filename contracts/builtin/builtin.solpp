@@ -1,0 +1,25 @@
+// SPDX-License-Identifier: GPL-3.0
+pragma soliditypp ^0.8.0;
+
+// Asset Built-in Contract
+interface BuiltinContractAssetInterface {
+    // Functions
+    function issue(bool _mintable, string memory _name, string memory _symbol, uint256 _totalSupply, uint8 _decimals, uint256 _maxSupply) external returns(vitetoken);
+    function mint(vitetoken tokenId, address to, uint256 amount) external returns(bytes32 mintBlockHash);
+    function burn() external payable returns(bool);
+    function transferOwnership(vitetoken tokenId, address newOwner) external returns(bool);
+    function name(vitetoken tokenId) external view returns(string memory);
+    function symbol(vitetoken tokenId) external view returns(string memory);
+    function decimals(vitetoken tokenId) external view returns(uint8);
+    function totalSupply(vitetoken tokenId) external view returns(uint256);
+    function maxSupply(vitetoken tokenId) external view returns(uint256);
+    function mintable(vitetoken tokenId) external view returns(bool);
+    function owner(vitetoken tokenId) external view returns(address);
+    // Events
+    event Issue(vitetoken indexed tokenId, address indexed owner);
+    event Mint(vitetoken indexed tokenId, address indexed to, uint256 amount);
+    event Burn(vitetoken indexed tokenId, uint256 amount);
+    event OwnershipTransferred(vitetoken indexed tokenId, address indexed previousOwner, address indexed newOwner);
+}
+
+BuiltinContractAssetInterface constant BuiltinContractAsset = BuiltinContractAssetInterface("vite_000000000000000000000000000000000000000595292d996d");
