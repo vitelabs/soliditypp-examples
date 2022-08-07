@@ -2,6 +2,7 @@
 // OpenZeppelin Contracts v4.4.1 (token/ERC1155/ERC1155.sol)
 
 pragma solidity ^0.8.0;
+pragma experimental Await;
 
 import "./IERC1155.sol";
 import "./IERC1155Receiver.sol";
@@ -170,6 +171,9 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
 
         _beforeTokenTransfer(operator, from, to, _asSingletonArray(id), _asSingletonArray(amount), data);
 
+        bool checkPassed = _doSafeTransferAcceptanceCheck(operator, from, to, id, amount, data);
+        require(checkPassed, "ERC1155: failed to pass the acceptance check");
+
         uint256 fromBalance = _balances[id][from];
         require(fromBalance >= amount, "ERC1155: insufficient balance for transfer");
         unchecked {
@@ -178,8 +182,6 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         _balances[id][to] += amount;
 
         emit TransferSingle(operator, from, to, id, amount);
-
-        _doSafeTransferAcceptanceCheck(operator, from, to, id, amount, data);
     }
 
     /**
@@ -206,6 +208,9 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
 
         _beforeTokenTransfer(operator, from, to, ids, amounts, data);
 
+        bool checkPassed = _doSafeBatchTransferAcceptanceCheck(operator, from, to, ids, amounts, data);
+        require(checkPassed, "ERC1155: failed to pass the acceptance check");
+
         for (uint256 i = 0; i < ids.length; ++i) {
             uint256 id = ids[i];
             uint256 amount = amounts[i];
@@ -219,8 +224,6 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         }
 
         emit TransferBatch(operator, from, to, ids, amounts);
-
-        _doSafeBatchTransferAcceptanceCheck(operator, from, to, ids, amounts, data);
     }
 
     /**
@@ -269,10 +272,11 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
 
         _beforeTokenTransfer(operator, address(0), to, _asSingletonArray(id), _asSingletonArray(amount), data);
 
+        bool checkPassed = _doSafeTransferAcceptanceCheck(operator, address(0), to, id, amount, data);
+        require(checkPassed, "ERC1155: failed to pass the acceptance check");
+
         _balances[id][to] += amount;
         emit TransferSingle(operator, address(0), to, id, amount);
-
-        _doSafeTransferAcceptanceCheck(operator, address(0), to, id, amount, data);
     }
 
     /**
@@ -297,13 +301,14 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
 
         _beforeTokenTransfer(operator, address(0), to, ids, amounts, data);
 
-        for (uint256 i = 0; i < ids.length; i++) {
+        bool checkPassed = _doSafeBatchTransferAcceptanceCheck(operator, address(0), to, ids, amounts, data);
+        require(checkPassed, "ERC1155: failed to pass the acceptance check");
+
+    for (uint256 i = 0; i < ids.length; i++) {
             _balances[ids[i]][to] += amounts[i];
         }
 
         emit TransferBatch(operator, address(0), to, ids, amounts);
-
-        _doSafeBatchTransferAcceptanceCheck(operator, address(0), to, ids, amounts, data);
     }
 
     /**
@@ -418,18 +423,17 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         uint256 id,
         uint256 amount,
         bytes memory data
-    ) private {
+    ) private returns (bool) {
         if (to.isContract()) {
-            try IERC1155Receiver(to).onERC1155Received(operator, from, id, amount, data) returns (bytes4 response) {
-                if (response != IERC1155Receiver.onERC1155Received.selector) {
-                    revert("ERC1155: ERC1155Receiver rejected tokens");
-                }
-            } catch Error(string memory reason) {
-                revert(reason);
-            } catch {
-                revert("ERC1155: transfer to non ERC1155Receiver implementer");
+            bytes4 response = await IERC1155Receiver(to).onERC1155Received(operator, from, id, amount, data);
+            if (response == IERC1155Receiver.onERC1155Received.selector) {
+                return true;
             }
+        } else {
+            return true;
         }
+
+        return false;
     }
 
     function _doSafeBatchTransferAcceptanceCheck(
@@ -439,20 +443,17 @@ contract ERC1155 is Context, ERC165, IERC1155, IERC1155MetadataURI {
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory data
-    ) private {
+    ) private returns (bool) {
         if (to.isContract()) {
-            try IERC1155Receiver(to).onERC1155BatchReceived(operator, from, ids, amounts, data) returns (
-                bytes4 response
-            ) {
-                if (response != IERC1155Receiver.onERC1155BatchReceived.selector) {
-                    revert("ERC1155: ERC1155Receiver rejected tokens");
-                }
-            } catch Error(string memory reason) {
-                revert(reason);
-            } catch {
-                revert("ERC1155: transfer to non ERC1155Receiver implementer");
+            bytes4 response = await IERC1155Receiver(to).onERC1155BatchReceived(operator, from, ids, amounts, data);
+            if (response == IERC1155Receiver.onERC1155BatchReceived.selector) {
+                return true;
             }
+        } else {
+            return true;
         }
+
+        return false;
     }
 
     function _asSingletonArray(uint256 element) private pure returns (uint256[] memory) {
