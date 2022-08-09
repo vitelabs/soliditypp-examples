@@ -71,7 +71,7 @@ describe('test OpenZeppelin ERC1155PresetMinterPauser', () => {
 				firstTokenIdAmount,
 				"0x00"
 			], { caller: deployer });
-			vite.utils.sleep(3000);
+			await token.waitForHeight(height + 1);
 			const events = await token.getPastEvents('allEvents', {fromHeight: height});
 			expect(events[events.length - 1].event).to.be.equal('TransferSingle');
 			expect(events[events.length - 1].returnValues.operator).to.be.equal(deployer.address);
@@ -107,7 +107,7 @@ describe('test OpenZeppelin ERC1155PresetMinterPauser', () => {
 				[firstTokenIdAmount, secondTokenIdAmount],
 				"0x00"
 			], { caller: deployer });
-			vite.utils.sleep(3000);
+			await token.waitForHeight(height + 1);
 			const events = await token.getPastEvents('allEvents', {fromHeight: height});
 			expect(events[events.length - 1].event).to.be.equal('TransferBatch');
 			expect(events[events.length - 1].returnValues.operator).to.be.equal(deployer.address);
@@ -136,7 +136,7 @@ describe('test OpenZeppelin ERC1155PresetMinterPauser', () => {
 		it('deployer can pause', async function () {
 			const height = await token.height();
 			await token.call("pause", [], { caller: deployer });
-			vite.utils.sleep(3000);
+			await token.waitForHeight(height + 1);
 			const events = await token.getPastEvents('allEvents', {fromHeight: height});
 			expect(events[events.length - 1].event).to.be.equal('Paused');
 			expect(events[events.length - 1].returnValues.account).to.be.equal(deployer.address);
@@ -149,7 +149,7 @@ describe('test OpenZeppelin ERC1155PresetMinterPauser', () => {
 
 			const height = await token.height();
 			await token.call("unpause", [], { caller: deployer });
-			vite.utils.sleep(3000);
+			await token.waitForHeight(height + 1);
 			const events = await token.getPastEvents('allEvents', {fromHeight: height});
 			expect(events[events.length - 1].event).to.be.equal('Unpaused');
 			expect(events[events.length - 1].returnValues.account).to.be.equal(deployer.address);
@@ -209,7 +209,7 @@ describe('test OpenZeppelin ERC1155PresetMinterPauser', () => {
 				firstTokenId,
 				(parseInt(firstTokenIdAmount) - 1).toString(),
 			], { caller: other });
-			vite.utils.sleep(3000);
+			await token.waitForHeight(height + 1);
 			const events = await token.getPastEvents('allEvents', {fromHeight: height});
 			expect(events[events.length - 1].event).to.be.equal('TransferSingle');
 			expect(events[events.length - 1].returnValues.operator).to.be.equal(other.address);

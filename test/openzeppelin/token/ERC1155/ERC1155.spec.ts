@@ -190,7 +190,7 @@ describe('test OpenZeppelin ERC1155', () => {
 					sideProxy.address,
 					true,
 				], {caller: sideMultiTokenHolder});
-				vite.utils.sleep(3000);
+				await token.waitForHeight(height + 1);
 				this.events = await token.getPastEvents('allEvents', {fromHeight: height});
 			});
 
@@ -294,7 +294,7 @@ describe('test OpenZeppelin ERC1155', () => {
 						firstAmount,
 						"0x00"
 					], {caller: sideMultiTokenHolder});
-					vite.utils.sleep(3000);
+					await token.waitForHeight(height + 1);
 					const events = await token.getPastEvents('allEvents', {fromHeight: height});
 					this.event = events[events.length - 1];
 				});
@@ -350,7 +350,7 @@ describe('test OpenZeppelin ERC1155', () => {
 							firstAmount,
 							"0x00"
 						], {caller: sideProxy});
-						vite.utils.sleep(3000);
+						await token.waitForHeight(height + 1);
 						const events = await token.getPastEvents('allEvents', {fromHeight: height});
 						this.event = events[events.length - 1];
 					});
@@ -387,7 +387,7 @@ describe('test OpenZeppelin ERC1155', () => {
 							firstAmount,
 							"0x00",
 						], {caller: sideMultiTokenHolder});
-						vite.utils.sleep(3000);
+						await token.waitForHeight(height + 2);
 						const events = await token.getPastEvents('allEvents', {fromHeight: height});
 						this.event = events[events.length - 1];
 					});
@@ -422,7 +422,7 @@ describe('test OpenZeppelin ERC1155', () => {
 							firstAmount,
 							data,
 						], {caller: sideMultiTokenHolder})
-						vite.utils.sleep(3000);
+						await token.waitForHeight(height + 2);
 						const events = await token.getPastEvents('allEvents', {fromHeight: height});
 						this.event = events[events.length - 1];
 					});
@@ -592,7 +592,7 @@ describe('test OpenZeppelin ERC1155', () => {
 						[firstAmount, secondAmount],
 						"0x00"
 					], {caller: sideMultiTokenHolder});
-					vite.utils.sleep(3000);
+					await token.waitForHeight(height + 1);
 					const events = await token.getPastEvents('allEvents', {fromHeight: height});
 					this.event = events[events.length - 1];
 				});
@@ -639,7 +639,7 @@ describe('test OpenZeppelin ERC1155', () => {
 							[firstAmount, secondAmount],
 							"0x00",
 						], {caller: sideProxy});
-						vite.utils.sleep(3000);
+						await token.waitForHeight(height + 1);
 						const events = await token.getPastEvents('allEvents', {fromHeight: height});
 						this.event = events[events.length - 1];
 					});
@@ -676,7 +676,7 @@ describe('test OpenZeppelin ERC1155', () => {
 							[firstAmount, secondAmount],
 							'0x00',
 						], { caller: sideMultiTokenHolder });
-						vite.utils.sleep(3000);
+						await token.waitForHeight(height + 2);
 						const events = await token.getPastEvents('allEvents', {fromHeight: height});
 						this.event = events[events.length - 1];
 					});
@@ -709,7 +709,7 @@ describe('test OpenZeppelin ERC1155', () => {
 							[firstAmount, secondAmount],
 							data,
 						], { caller: sideMultiTokenHolder });
-						vite.utils.sleep(3000);
+						await token.waitForHeight(height + 2);
 						const events = await token.getPastEvents('allEvents', {fromHeight: height});
 						this.event = events[events.length - 1];
 					});
@@ -789,7 +789,7 @@ describe('test OpenZeppelin ERC1155', () => {
 						[firstAmount, secondAmount],
 						"0x00",
 					], { caller: sideMultiTokenHolder });
-					vite.utils.sleep(3000);
+					await token.waitForHeight(height + 2);
 					const events = await token.getPastEvents('allEvents', {fromHeight: height});
 					this.event = events[events.length - 1];
 				});
@@ -862,7 +862,7 @@ describe('test OpenZeppelin ERC1155', () => {
 						mintAmount,
 						data,
 					], {caller: operator});
-					vite.utils.sleep(3000);
+					await token.waitForHeight(height + 1);
 					this.events = await token.getPastEvents('allEvents', {fromHeight: height});
 				});
 
@@ -932,7 +932,7 @@ describe('test OpenZeppelin ERC1155', () => {
 						mintAmounts,
 						data,
 					], {caller: operator});
-					vite.utils.sleep(3000);
+					await token.waitForHeight(height + 1);
 					this.events = await token.getPastEvents('allEvents', {fromHeight: height});
 				});
 
@@ -1015,7 +1015,7 @@ describe('test OpenZeppelin ERC1155', () => {
 						tokenId,
 						burnAmount,
 					], {caller: operator});
-					vite.utils.sleep(3000);
+					await token.waitForHeight(height + 1);
 					this.events = await token.getPastEvents('allEvents', {fromHeight: height});
 				});
 
@@ -1101,7 +1101,7 @@ describe('test OpenZeppelin ERC1155', () => {
 						tokenBatchIds,
 						burnAmounts,
 					], {caller: operator});
-					vite.utils.sleep(3000);
+					await token.waitForHeight(height + 1);
 					this.events = await token.getPastEvents('allEvents', {fromHeight: height});
 				});
 
@@ -1156,7 +1156,7 @@ describe('test OpenZeppelin ERC1155', () => {
 				await token.call("setURI", [
 					newURI
 				], {caller: deployer});
-				vite.utils.sleep(3000);
+				await token.waitForHeight(height + 1);
 				const events = await token.getPastEvents('allEvents', {fromHeight: height});
 
 				let hasURIEvent = false;

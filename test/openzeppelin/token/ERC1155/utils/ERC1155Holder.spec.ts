@@ -39,6 +39,7 @@ describe('test OpenZeppelin ERC1155Holder', () => {
 	});
 
 	it('receives ERC1155 tokens from a single ID', async function () {
+		const height = await multiToken.height();
 		await multiToken.call('safeTransferFrom', [
 			deployer.address,
 			holder.address,
@@ -47,8 +48,7 @@ describe('test OpenZeppelin ERC1155Holder', () => {
 			transferData
 			], { caller: deployer }
 		)
-
-		vite.utils.sleep(1000);
+		await multiToken.waitForHeight(height + 2);
 
 		expect(await multiToken.query('balanceOf', [holder.address, multiTokenIds[0]]))
 			.to.be.deep.equal([multiTokenAmounts[0]]);
@@ -65,6 +65,7 @@ describe('test OpenZeppelin ERC1155Holder', () => {
 				.to.be.deep.equal(['0']);
 		}
 
+		const height = await multiToken.height();
 		await multiToken.call('safeBatchTransferFrom', [
 				deployer.address,
 				holder.address,
@@ -74,7 +75,7 @@ describe('test OpenZeppelin ERC1155Holder', () => {
 			], { caller: deployer }
 		)
 
-		vite.utils.sleep(1000);
+		await multiToken.waitForHeight(height + 2);
 
 		for (let i = 0; i < multiTokenIds.length; i++) {
 			expect(await multiToken.query('balanceOf', [holder.address, multiTokenIds[i]]))
