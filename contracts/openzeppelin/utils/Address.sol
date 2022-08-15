@@ -34,11 +34,9 @@ library Address {
      * ====
      */
     function isContract(address account) internal view returns (bool) {
-        // This method relies on extcodesize/address.code.length, which returns 0
-        // for contracts in construction, since the code is only stored at the end
-        // of the constructor execution.
-
-        return account.code.length > 0;
+        // A Vite address can be converted to a bytes21 (An Ethereum address can be converted to a bytes20).
+        // The last byte of the bytes21 represents the address type, 0x00 for user address and 0x01 for contract address.
+        return bytes21(account)[20] == 0x01;
     }
 
     /**
